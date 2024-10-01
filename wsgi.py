@@ -1,11 +1,12 @@
+from App.controllers.application import create_application
 import click, pytest, sys
 from flask import Flask
 from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
-from App.models import User
+from App.models import User, Applicant, Application, Recruiter, Job
 from App.main import create_app
-from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize )
+from App.controllers import *
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -22,6 +23,9 @@ def init():
 '''
 User Commands
 '''
+
+#@app.cli.command("create_job", help="Allows the recruiter to create jobs for listing")
+#@click.argument('')
 
 # Commands can be organized using groups
 
@@ -48,6 +52,83 @@ def list_user_command(format):
         print(get_all_users_json())
 
 app.cli.add_command(user_cli) # add the group to the cli
+
+'''
+Applicant Commands
+'''
+applicant_cli = AppGroup('applicant', help='Applicant model commands')
+
+@applicant_cli.command("list_applicants", help="Lists applicants registered")
+def list_applicant():
+    list_applicants()
+
+
+
+app.cli.add_command(applicant_cli)
+
+'''
+Recruiter Commands
+'''
+
+recruiter_cli = AppGroup('recruiter', help='Recruiter model commands')
+
+@recruiter_cli.command('list_recruiters', help="Lists recruiters registered")
+def list_recruiter():
+    list_recruiters()
+
+app.cli.add_command(recruiter_cli)
+
+'''
+Job Commands
+'''
+
+job_cli = AppGroup('job', help='Job model commands')
+
+@job_cli.command('list_jobs', help="Lists jobs registered")
+def list_job():
+    list_jobs()
+
+@job_cli.command('create_job', help='Creates a job to add to the database')
+@click.argument('recruiternum')
+@click.argument('jobtype')
+@click.argument('salary')
+def create_job_command(recruiternum, jobtype, salary):
+    if create_job(recruiternum, jobtype, salary):
+        print(f'Job "{jobtype}" was created.')
+
+@job_cli.command('list_job_applicants', help='List applications that are linked to this Job')
+@click.argument('jobnum')
+def list_job_applicants_command(jobnum):
+    list_job_applicants(jobnum)
+
+
+app.cli.add_command(job_cli)
+
+
+'''
+Application Commands
+'''
+application_cli = AppGroup('application', help='Application model commands')
+
+@application_cli.command('list_applications', help="Lists applications")
+def list_application():
+    list_applications()
+
+@application_cli.command('create_application', help='create application for an applicant')
+@click.argument('applicantnum')
+@click.argument('jobnum')
+@click.argument('recruiternum')
+def create_application_command(applicantnum, jobnum, recruiternum):
+    if create_application(applicantnum, jobnum, recruiternum):
+        applicant = Applicant.query.filter_by(id=applicantnum).first()
+        print(f'Application made for', applicant.fullname)
+    else:
+        print("Application Already Exists")
+
+
+
+app.cli.add_command(application_cli)
+
 
 '''
 Test Commands
