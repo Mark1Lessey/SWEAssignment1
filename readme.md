@@ -85,6 +85,14 @@ Applicant Commands
 '''
 applicant_cli = AppGroup('applicant', help='Applicant model commands')
 
+@applicant_cli.command('create_applicant', help='Creates an applicant object')
+@click.argument('fullname')
+@click.argument('email')
+@click.argument('contact')
+def create_applicant_comand(fullname, email, contact):
+    if create_applicant(fullname, email, contact):
+        print(f'Applicant "{fullname}" was added.')
+
 @applicant_cli.command("list_applicants", help="Lists applicants registered")
 def list_applicant():
     list_applicants()
@@ -96,11 +104,16 @@ app.cli.add_command(applicant_cli)
 '''
 Recruiter Commands
 '''
-
 recruiter_cli = AppGroup('recruiter', help='Recruiter model commands')
 
+@recruiter_cli.command('create_recruiter', help='Creates a recruiter object')
+@click.argument('name')
+def create_recruiter_command(name):
+    if create_recruiter(name):
+        print(f'Recruiter "{name}" was added.')
+        
 @recruiter_cli.command('list_recruiters', help="Lists recruiters registered")
-def list_recruiter():
+def list_recruiter_comand():
     list_recruiters()
 
 app.cli.add_command(recruiter_cli)
@@ -111,17 +124,17 @@ Job Commands
 
 job_cli = AppGroup('job', help='Job model commands')
 
-@job_cli.command('list_jobs', help="Lists jobs registered")
-def list_job():
-    list_jobs()
-
-@job_cli.command('create_job', help='Creates a job to add to the database')
+@job_cli.command('create_job', help='Creates a job object')
 @click.argument('recruiternum')
 @click.argument('jobtype')
 @click.argument('salary')
 def create_job_command(recruiternum, jobtype, salary):
     if create_job(recruiternum, jobtype, salary):
         print(f'Job "{jobtype}" was created.')
+
+@job_cli.command('list_jobs', help="Lists jobs registered")
+def list_job():
+    list_jobs()
 
 @job_cli.command('list_job_applicants', help='List applications that are linked to this Job')
 @click.argument('jobnum')
@@ -137,11 +150,7 @@ Application Commands
 '''
 application_cli = AppGroup('application', help='Application model commands')
 
-@application_cli.command('list_applications', help="Lists applications")
-def list_application():
-    list_applications()
-
-@application_cli.command('create_application', help='create application for an applicant')
+@application_cli.command('create_application', help='create application object')
 @click.argument('applicantnum')
 @click.argument('jobnum')
 @click.argument('recruiternum')
@@ -152,7 +161,9 @@ def create_application_command(applicantnum, jobnum, recruiternum):
     else:
         print("Application Already Exists")
 
-
+@application_cli.command('list_applications', help="Lists applications")
+def list_application_command():
+    list_applications()
 
 app.cli.add_command(application_cli)
 
